@@ -2,7 +2,10 @@ package com.example.demo.controller;
 
 import com.example.demo.common.Result;
 import com.example.demo.common.ResultCode;
+import com.example.demo.dto.UserDTO;
 import com.example.demo.entity.User;
+import com.example.demo.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -13,34 +16,79 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequestMapping("/api/users")
 public class UserController {
 
-    // 模拟数据库（线程安全的Map）
+    @Autowired
+    private UserService userService;
+
+    // 模拟数据库（用于测试受保护资源）
     private static final ConcurrentHashMap<Long, User> userMap = new ConcurrentHashMap<>();
     private static Long idCounter = 1L;
 
-    // 1. 获取用户信息（查）
+    // ========== 使用 Service 层的业务接口 ==========
+
+    /**
+     * 用户注册
+     * POST /api/users
+     */
+    @PostMapping
+    public Result<String> register(@RequestBody UserDTO userDTO) {
+        Result<String> result = userService.register(userDTO);
+        if (ResultCode.SUCCESS.getCode().equals(result.getCode())) {
+            User user = new User();
+            user.setId(idCounter++);
+            user.setName(userDTO.getUsername());
+            userMap.put(user.getId(), user);
+        }
+        return result;
+    }
+
+    /**
+     * 用户登录
+     * POST /api/users/login
+     */
+    @PostMapping("/login")
+    public Result<String> login(@RequestBody UserDTO userDTO) {
+        return userService.login(userDTO);
+    }
+
+    // ========== 受保护的资源接口 ==========
+
+    /**
+     * 获取用户信息（受保护资源，需要 Token）
+     * GET /api/users/{id}
+     */
     @GetMapping("/{id}")
     public Result<User> getUser(@PathVariable("id") Long id) {
         User user = userMap.get(id);
         if (user == null) {
-            // 使用 ResultCode 枚举返回错误
             return Result.error(ResultCode.USER_NOT_FOUND);
         }
-        // 返回成功，数据为 user 对象
         return Result.success(user);
     }
 
-    // 2. 新增用户（增）
-    @PostMapping
+    /**
+     * 创建用户（受保护资源，需要 Token）
+     * POST /api/users/test
+     */
+    @PostMapping("/test")
     public Result<User> createUser(@RequestBody User user) {
-        // 设置ID
         user.setId(idCounter++);
-        // 保存用户
         userMap.put(user.getId(), user);
-        // 返回成功，数据为新增的用户
         return Result.success(user);
     }
 
-    // 3. 全量更新用户信息（改）
+    /**
+     * 获取所有用户（受保护资源，需要 Token）
+     * GET /api/users/list
+     */
+    @GetMapping("/list")
+    public Result<List<User>> getAllUsers() {
+        return Result.success(new ArrayList<>(userMap.values()));
+    }
+
+    /**
+     * 更新用户（受保护资源，需要 Token）
+     * PUT /api/users/{id}
+     */
     @PutMapping("/{id}")
     public Result<User> updateUser(@PathVariable("id") Long id, @RequestBody User user) {
         if (!userMap.containsKey(id)) {
@@ -51,7 +99,10 @@ public class UserController {
         return Result.success(user);
     }
 
-    // 4. 删除用户（删）
+    /**
+     * 删除用户（受保护资源，需要 Token）
+     * DELETE /api/users/{id}
+     */
     @DeleteMapping("/{id}")
     public Result<String> deleteUser(@PathVariable("id") Long id) {
         User removedUser = userMap.remove(id);
@@ -59,18 +110,5 @@ public class UserController {
             return Result.error(ResultCode.USER_NOT_FOUND);
         }
         return Result.success("删除成功，已移除 ID 为 " + id + " 的用户");
-    }
-
-    // 5. 获取所有用户列表（额外添加，便于测试）
-    @GetMapping
-    public Result<List<User>> getAllUsers() {
-        return Result.success(new ArrayList<>(userMap.values()));
-    }
-
-    // 6. 触发异常测试（故意除以零）- 展示全局异常处理的重要性
-    @GetMapping("/test/error")
-    public Result<String> testError() {
-        int a = 1 / 0;  // 故意触发算术异常
-        return Result.success("不会执行到这里");
     }
 }

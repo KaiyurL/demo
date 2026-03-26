@@ -12,15 +12,15 @@ public class AuthInterceptor implements HandlerInterceptor {
         String method = request.getMethod();
         String uri = request.getRequestURI();
 
-        // 放行规则：POST /api/users（注册）和 GET /api/users/{id}（查询）
-        boolean isCreateUser = "POST".equalsIgnoreCase(method) && "/api/users".equals(uri);
-        boolean isGetUser = "GET".equalsIgnoreCase(method) && uri.startsWith("/api/users/");
+        // 放行规则：注册、登录
+        boolean isRegister = "POST".equalsIgnoreCase(method) && "/api/users".equals(uri);
+        boolean isLogin = "POST".equalsIgnoreCase(method) && "/api/users/login".equals(uri);
 
-        if (isCreateUser || isGetUser) {
+        if (isRegister || isLogin) {
             return true;
         }
 
-        // 敏感操作（如 DELETE、PUT）需要 Token
+        // 其它接口需要 Token（包括 GET /api/users/{id}）
         String token = request.getHeader("Authorization");
         if (token == null || token.isEmpty()) {
             response.setContentType("application/json;charset=UTF-8");

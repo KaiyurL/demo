@@ -1,0 +1,5 @@
+INSERT INTO `sys_user` (`username`, `password`) VALUES
+    ('admin', '123456'),
+    ('zhangsan', '123456');
+
+SELECT * FROM sys_user;
