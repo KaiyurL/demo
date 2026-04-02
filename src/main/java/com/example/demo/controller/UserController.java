@@ -31,14 +31,7 @@ public class UserController {
      */
     @PostMapping
     public Result<String> register(@RequestBody UserDTO userDTO) {
-        Result<String> result = userService.register(userDTO);
-        if (ResultCode.SUCCESS.getCode().equals(result.getCode())) {
-            User user = new User();
-            user.setId(idCounter++);
-            user.setName(userDTO.getUsername());
-            userMap.put(user.getId(), user);
-        }
-        return result;
+        return userService.register(userDTO);
     }
 
     /**
@@ -58,11 +51,7 @@ public class UserController {
      */
     @GetMapping("/{id}")
     public Result<User> getUser(@PathVariable("id") Long id) {
-        User user = userMap.get(id);
-        if (user == null) {
-            return Result.error(ResultCode.USER_NOT_FOUND);
-        }
-        return Result.success(user);
+        return userService.getUserById(id);
     }
 
     /**
