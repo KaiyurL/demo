@@ -55,6 +55,16 @@ public class UserController {
     }
 
     /**
+     * 分页查询用户列表 - 路径为 GET /api/users/page
+     */
+    @GetMapping("/page")
+    public Result<Object> getUserPage(
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "5") Integer pageSize) {
+        return userService.getUserPage(pageNum, pageSize);
+    }
+
+    /**
      * 创建用户（受保护资源，需要 Token）
      * POST /api/users/test
      */

@@ -1,6 +1,7 @@
 package com.example.demo.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.demo.common.Result;
 import com.example.demo.common.ResultCode;
 import com.example.demo.dto.UserDTO;
@@ -55,6 +56,19 @@ public class UserServiceImpl implements UserService {
         String token = UUID.randomUUID().toString().replace("-", "");
 
         return Result.success(token, "登录成功");
+    }
+
+    @Override
+    public Result<Object> getUserPage(Integer pageNum, Integer pageSize) {
+        // 1. 创建分页对象（参数 1：当前页码，参数 2：每页显示条数）
+        Page<User> pageParam = new Page<>(pageNum, pageSize);
+
+        // 2. 执行分页查询（参数 1：分页对象，参数 2：查询条件 Wrapper，这里传 null 代表查询全部）
+        // 框架会自动执行一条 COUNT 语句查询总数，再拼接 LIMIT 执行分页
+        Page<User> resultPage = userMapper.selectPage(pageParam, null);
+
+        // 3. 返回结果（resultPage 中包含了 records 数据列表、total 总条数、pages 总页数）
+        return Result.success(resultPage);
     }
 
     @Override
