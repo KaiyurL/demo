@@ -4,7 +4,9 @@ import com.example.demo.common.Result;
 import com.example.demo.common.ResultCode;
 import com.example.demo.dto.UserDTO;
 import com.example.demo.entity.User;
+import com.example.demo.entity.UserInfo;
 import com.example.demo.service.UserService;
+import com.example.demo.vo.UserDetailVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,10 +20,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
-    // 模拟数据库（用于测试受保护资源）
-    private static final ConcurrentHashMap<Long, User> userMap = new ConcurrentHashMap<>();
-    private static Long idCounter = 1L;
 
     // ========== 使用 Service 层的业务接口 ==========
 
@@ -54,6 +52,26 @@ public class UserController {
         return userService.getUserById(id);
     }
 
+    // 5. 查询用户详情（多表联查 + Redis）
+    @GetMapping("/{id}/detail")
+    public Result<UserDetailVO> getUserDetail(@PathVariable("id") Long userId) {
+        return userService.getUserDetail(userId);
+    }
+
+    // 6. 更新用户扩展信息
+    @PutMapping("/{id}/detail")
+    public Result<String> updateUserInfo(@PathVariable("id") Long userId,
+                                         @RequestBody UserInfo userInfo) {
+        userInfo.setUserId(userId);
+        return userService.updateUserInfo(userInfo);
+    }
+
+    // 7. 删除用户
+    @DeleteMapping("/{id}")
+    public Result<String> deleteUser(@PathVariable("id") Long userId) {
+        return userService.deleteUser(userId);
+    }
+
     /**
      * 分页查询用户列表 - 路径为 GET /api/users/page
      */
@@ -62,52 +80,5 @@ public class UserController {
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "5") Integer pageSize) {
         return userService.getUserPage(pageNum, pageSize);
-    }
-
-    /**
-     * 创建用户（受保护资源，需要 Token）
-     * POST /api/users/test
-     */
-    @PostMapping("/test")
-    public Result<User> createUser(@RequestBody User user) {
-        user.setId(idCounter++);
-        userMap.put(user.getId(), user);
-        return Result.success(user);
-    }
-
-    /**
-     * 获取所有用户（受保护资源，需要 Token）
-     * GET /api/users/list
-     */
-    @GetMapping("/list")
-    public Result<List<User>> getAllUsers() {
-        return Result.success(new ArrayList<>(userMap.values()));
-    }
-
-    /**
-     * 更新用户（受保护资源，需要 Token）
-     * PUT /api/users/{id}
-     */
-    @PutMapping("/{id}")
-    public Result<User> updateUser(@PathVariable("id") Long id, @RequestBody User user) {
-        if (!userMap.containsKey(id)) {
-            return Result.error(ResultCode.USER_NOT_FOUND);
-        }
-        user.setId(id);
-        userMap.put(id, user);
-        return Result.success(user);
-    }
-
-    /**
-     * 删除用户（受保护资源，需要 Token）
-     * DELETE /api/users/{id}
-     */
-    @DeleteMapping("/{id}")
-    public Result<String> deleteUser(@PathVariable("id") Long id) {
-        User removedUser = userMap.remove(id);
-        if (removedUser == null) {
-            return Result.error(ResultCode.USER_NOT_FOUND);
-        }
-        return Result.success("删除成功，已移除 ID 为 " + id + " 的用户");
     }
 }
