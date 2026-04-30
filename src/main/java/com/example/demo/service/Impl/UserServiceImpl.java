@@ -11,6 +11,7 @@ import com.example.demo.entity.User;
 import com.example.demo.entity.UserInfo;
 import com.example.demo.mapper.UserInfoMapper;
 import com.example.demo.mapper.UserMapper;
+import com.example.demo.security.JwtUtil;
 import com.example.demo.service.UserService;
 import com.example.demo.vo.UserDetailVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service // 必须添加该注解，将业务类交给 Spring 容器管理
@@ -32,6 +32,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private StringRedisTemplate redisTemplate;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     private static final String CACHE_KEY_PREFIX = "user:detail:";
 
@@ -69,9 +72,9 @@ public class UserServiceImpl implements UserService {
             return Result.error(ResultCode.PASSWORD_ERROR);
         }
 
-        String token = UUID.randomUUID().toString().replace("-", "");
+        String jwt = jwtUtil.generateToken(userDTO.getUsername());
 
-        return Result.success(token, "登录成功");
+        return Result.success(jwt);
     }
 
     @Override
