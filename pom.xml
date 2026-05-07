@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.3</version>
+		<version>3.5.7</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.pdmadmin</groupId>
@@ -32,11 +32,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-restclient</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webmvc</artifactId>
+			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -45,7 +41,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.baomidou</groupId>
-			<artifactId>mybatis-plus-spring-boot4-starter</artifactId>
+			<artifactId>mybatis-plus-spring-boot3-starter</artifactId>
 			<version>3.5.15</version>
 		</dependency>
 		<dependency>
@@ -93,14 +89,23 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- Spring AI Alibaba Agent Framework -->
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-restclient-test</artifactId>
-			<scope>test</scope>
+			<groupId>com.alibaba.cloud.ai</groupId>
+			<artifactId>spring-ai-alibaba-agent-framework</artifactId>
+			<version>1.1.2.0</version>
 		</dependency>
+
+		<!-- DashScope ChatModel 支持 -->
+		<dependency>
+			<groupId>com.alibaba.cloud.ai</groupId>
+			<artifactId>spring-ai-alibaba-starter-dashscope</artifactId>
+			<version>1.1.2.0</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webmvc-test</artifactId>
+			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
